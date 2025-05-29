@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quotation Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    td, th { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    .quotation { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; margin-top: 20px; }
+    h3, h2 { margin-bottom: 5px; }
+    .remove-btn { cursor: pointer; color: blue; text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<h2>Quotation Generator</h2>
+
+<label>Product:</label>
+<select id="product" onchange="updateSpec()">
+  <option value="sticks">Sticks</option>
+  <option value="cropcover">Crop Cover</option>
+  <option value="raincover">Rain Cover</option>
+  <option value="anchor">Anchor</option>
+  <option value="thread">Thread</option>
+  <option value="clips">Clips</option>
+</select><br><br>
+
+<label>Specification:</label>
+<select id="spec"></select><br><br>
+
+<label>Custom Price (₹):</label>
+<input type="number" id="customPrice" placeholder="Leave empty for default"><br><br>
+
+<label>Customer Type:</label>
+<select id="type">
+  <option value="farmer">Farmer</option>
+  <option value="big">Big Farmer</option>
+  <option value="dealer">Dealer</option>
+</select><br><br>
+
+<label>Quantity:</label>
+<input type="number" id="qty" value="1" min="1"><br><br>
+
+<label>Handling Charge (₹):</label>
+<input type="number" id="handling" value="0" min="0"><br><br>
+
+<button onclick="generateQuote()">Add to Quotation</button>
+
+<h3>Quotation</h3>
+<table id="quoteTable">
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Specification</th>
+      <th>Unit Price (₹)</th>
+      <th>Quantity</th>
+      <th>Total (₹)</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h3 id="handlingCharge">Handling Charge: ₹0</h3>
+<h3 id="grandTotal">Grand Total: ₹0</h3>
+
+<div class="quotation" id="copyBlock"></div>
+
+<script>
+const pricing = {
+  sticks: {
+    "6ft, 5mm": { farmer: 16.52, big: 14.16, dealer: 12.39 },
+    "7ft, 5mm": { farmer: 17.7, big: 16.52, dealer: 14.16 },
+    "8ft, 5mm": { farmer: 20.06, big: 18.88, dealer: 16.52 },
+    "10ft, 5mm": { farmer: 25.96, big: 23.6, dealer: 21.24 },
+    "10ft, 6mm": { farmer: 47.2, big: 45.1, dealer: 43.66 },
+    "12ft, 5mm": { farmer: 29.5, big: 25.96, dealer: 23.6 },
+    "12ft, 6mm": { farmer: 56.64, big: 54.2, dealer: 53.1 }
+  },
+  cropcover: {
+    "GSM 17, Width 5.25ft": { farmer: 3142, big: 3046, dealer: 2856 },
+    "GSM 17, Width 8ft": { farmer: 4786, big: 4641, dealer: 4315 },
+    "GSM 17, Width 10.5ft": { farmer: 6283, big: 6092, dealer: 5712 },
+    "GSM 23, Width 5.25ft": { farmer: 4251, big: 4121, dealer: 3864 },
+    "GSM 23, Width 8ft": { farmer: 6468, big: 6272, dealer: 5880 },
+    "GSM 23, Width 10.5ft": { farmer: 8500, big: 8243, dealer: 7728 },
+  },
+  raincover: {
+    "Length 110m, Micron 30, Width 6.5ft": { farmer: 1416, big: 1350, dealer: 1280 }
+  },
+  anchor: {
+    "fixed": { farmer: 5.9, big: 5.54, dealer: 5.31 }
+  },
+  thread: {
+    "T20": { farmer: 168, big: 150, dealer: 150 },
+    "T40": { farmer: 247, big: 224, dealer: 224 },
+    "T60": { farmer: 308, big: 285, dealer: 285 },
+    "T120": { farmer: 300, big: 280, dealer: 280 }
+  },
+  clips: {
+    "fixed": { farmer: 2.36, big: 2.1, dealer: 1.77 }
+  }
+};
+
+function updateSpec() {
+  const product = document.getElementById('product').value;
+  const specSelect = document.getElementById('spec');
+  specSelect.innerHTML = "";
+  Object.keys(pricing[product]).forEach(spec => {
+    const opt = document.createElement("option");
+    opt.value = spec;
+    opt.innerText = spec;
+    specSelect.appendChild(opt);
+  });
+}
+
+updateSpec();
+
+let total = 0;
+let items = [];
+
+function generateQuote() {
+  const product = document.getElementById('product').value;
+  const spec = document.getElementById('spec').value;
+  const type = document.getElementById('type').value;
+  const qty = parseInt(document.getElementById('qty').value);
+  const customPrice = parseFloat(document.getElementById('customPrice').value);
+
+  const unitPrice = customPrice || pricing[product][spec][type];
+  const itemTotal = unitPrice * qty;
+  total += itemTotal;
+
+  const item = { product, spec, unitPrice, qty, itemTotal };
+  items.push(item);
+  updateTable();
+}
+
+function removeItem(index) {
+  const { itemTotal } = items[index];
+  total -= itemTotal;
+  items.splice(index, 1);
+  updateTable();
+}
+
+function updateTable() {
+  const tbody = document.querySelector("#quoteTable tbody");
+  tbody.innerHTML = "";
+  items.forEach((item, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${capitalizeFirst(item.product)}</td><td>${item.spec}</td><td>${item.unitPrice.toFixed(2)}</td><td>${item.qty}</td><td>${item.itemTotal.toFixed(2)}</td><td><span class='remove-btn' onclick='removeItem(${index})'>Remove</span></td>`;
+    tbody.appendChild(row);
+  });
+
+  const handling = parseFloat(document.getElementById('handling').value);
+  document.getElementById('handlingCharge').innerText = `Handling Charge: ₹${handling.toFixed(2)}`;
+  const grandTotal = total + handling;
+  document.getElementById('grandTotal').innerText = `Grand Total: ₹${grandTotal.toFixed(2)}`;
+
+  const quoteText = items.map((item, index) => 
+    `${index + 1}. ${capitalizeFirst(item.product)} - ${item.spec}\nPrice Per Piece: ₹${item.unitPrice.toFixed(2)}\nTotal: ₹${item.itemTotal.toFixed(2)}`
+  ).join("\n\n");
+
+  document.getElementById('copyBlock').innerText = `${quoteText}\n\nHandling Charge: ₹${handling.toFixed(2)}\nGrand Total: ₹${grandTotal.toFixed(2)}`;
+}
+
+function capitalizeFirst(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+</script>
+
+</body>
+</html>
