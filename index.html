@@ -4,30 +4,61 @@
   <meta charset="UTF-8">
   <title>Quotation Generator</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; min-width: 600px; }
-    td, th { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    .quotation { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; margin-top: 20px; }
-    h3, h2 { margin-bottom: 5px; }
-    .remove-btn { cursor: pointer; color: blue; text-decoration: underline; }
-
+    body { font-family: Arial, sans-serif; padding: 20px; margin: 0; }
+    label, select, input, button {
+      display: block;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+    input, select {
+      padding: 8px;
+    }
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    h2, h3 {
+      margin-top: 20px;
+    }
     .table-container {
       overflow-x: auto;
     }
-
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 600px;
+      margin-top: 10px;
+    }
+    td, th {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    .remove-btn {
+      cursor: pointer;
+      color: blue;
+      text-decoration: underline;
+    }
+    .quotation {
+      white-space: pre-wrap;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 20px;
+      font-size: 16px;
+      background-color: #f9f9f9;
+    }
     @media (max-width: 600px) {
-      body { padding: 10px; font-size: 15px; }
-      select, input, button {
-        width: 100%;
-        margin-bottom: 10px;
-        font-size: 15px;
-      }
-      table {
-        font-size: 13px;
-      }
-      .quotation {
-        font-size: 13px;
-      }
+      body { padding: 10px; }
+      .quotation, table { font-size: 14px; }
+      label, input, select, button { font-size: 14px; }
     }
   </style>
 </head>
@@ -43,26 +74,26 @@
   <option value="anchor">Anchor</option>
   <option value="thread">Thread</option>
   <option value="clips">Clips</option>
-</select><br><br>
+</select>
 
 <label>Specification:</label>
-<select id="spec"></select><br><br>
+<select id="spec"></select>
 
 <label>Custom Price (₹):</label>
-<input type="number" id="customPrice" placeholder="Leave empty for default"><br><br>
+<input type="number" id="customPrice" placeholder="Leave empty for default">
 
 <label>Customer Type:</label>
 <select id="type">
   <option value="farmer">Farmer</option>
   <option value="big">Big Farmer</option>
   <option value="dealer">Dealer</option>
-</select><br><br>
+</select>
 
 <label>Quantity:</label>
-<input type="number" id="qty" value="1" min="1"><br><br>
+<input type="number" id="qty" value="1" min="1">
 
 <label>Handling Charge (₹):</label>
-<input type="number" id="handling" value="0" min="0"><br><br>
+<input type="number" id="handling" value="0" min="0">
 
 <button onclick="generateQuote()">Add to Quotation</button>
 
@@ -87,7 +118,7 @@
 <h3 id="grandTotal">Grand Total: ₹0</h3>
 
 <h3>Quotation</h3>
-<div class="quotation" id="copyBlock"></div>
+<div class="quotation" id="copyBlock">Quotation</div>
 <button onclick="copyQuotation()">Copy Quotation</button>
 
 <script>
@@ -149,16 +180,19 @@ function generateQuote() {
   const type = document.getElementById('type').value;
   const qty = parseInt(document.getElementById('qty').value);
   const customPrice = parseFloat(document.getElementById('customPrice').value);
+
   const unitPrice = customPrice || pricing[product][spec][type];
   const itemTotal = unitPrice * qty;
-
   total += itemTotal;
-  items.push({ product, spec, unitPrice, qty, itemTotal });
+
+  const item = { product, spec, unitPrice, qty, itemTotal };
+  items.push(item);
   updateTable();
 }
 
 function removeItem(index) {
-  total -= items[index].itemTotal;
+  const { itemTotal } = items[index];
+  total -= itemTotal;
   items.splice(index, 1);
   updateTable();
 }
@@ -173,23 +207,23 @@ function updateTable() {
   });
 
   const handling = parseFloat(document.getElementById('handling').value);
-  const grandTotal = total + handling;
-
   document.getElementById('handlingCharge').innerText = `Handling Charge: ₹${handling.toFixed(2)}`;
+  const grandTotal = total + handling;
   document.getElementById('grandTotal').innerText = `Grand Total: ₹${grandTotal.toFixed(2)}`;
 
   const quoteText = items.map((item, index) =>
     `${index + 1}. ${capitalizeFirst(item.product)} - ${item.spec}\nPrice Per Piece: ₹${item.unitPrice.toFixed(2)}\nTotal: ₹${item.itemTotal.toFixed(2)}`
   ).join("\n\n");
 
-  document.getElementById('copyBlock').innerText = `Quotation:\n\n${quoteText}\n\nHandling Charge: ₹${handling.toFixed(2)}\nGrand Total: ₹${grandTotal.toFixed(2)}`;
+  document.getElementById('copyBlock').innerText =
+    `Quotation\n\n${quoteText}\n\nHandling Charge: ₹${handling.toFixed(2)}\nGrand Total: ₹${grandTotal.toFixed(2)}`;
 }
 
 function copyQuotation() {
   const copyText = document.getElementById('copyBlock').innerText;
   navigator.clipboard.writeText(copyText).then(() => {
     alert('Quotation copied to clipboard');
-  }).catch(err => {
+  }, (err) => {
     console.error('Error copying text: ', err);
   });
 }
