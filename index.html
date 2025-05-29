@@ -10,6 +10,11 @@
     .quotation { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; margin-top: 20px; }
     h3, h2 { margin-bottom: 5px; }
     .remove-btn { cursor: pointer; color: blue; text-decoration: underline; }
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      table { font-size: 14px; }
+      .quotation { font-size: 14px; }
+    }
   </style>
 </head>
 <body>
@@ -64,7 +69,9 @@
 <h3 id="handlingCharge">Handling Charge: ₹0</h3>
 <h3 id="grandTotal">Grand Total: ₹0</h3>
 
+<h3>Quotation</h3>
 <div class="quotation" id="copyBlock"></div>
+<button onclick="copyQuotation()">Copy Quotation</button>
 
 <script>
 const pricing = {
@@ -161,6 +168,15 @@ function updateTable() {
   ).join("\n\n");
 
   document.getElementById('copyBlock').innerText = `${quoteText}\n\nHandling Charge: ₹${handling.toFixed(2)}\nGrand Total: ₹${grandTotal.toFixed(2)}`;
+}
+
+function copyQuotation() {
+  const copyText = document.getElementById('copyBlock').innerText;
+  navigator.clipboard.writeText(copyText).then(() => {
+    alert('Quotation copied to clipboard');
+  }, (err) => {
+    console.error('Error copying text: ', err);
+  });
 }
 
 function capitalizeFirst(string) {
