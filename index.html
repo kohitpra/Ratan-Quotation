@@ -185,8 +185,16 @@ function generateQuote() {
   const itemTotal = unitPrice * qty;
   total += itemTotal;
 
-  const item = { product, spec, unitPrice, qty, itemTotal };
-  items.push(item);
+  const existingItem = items.find(item => item.product === product && item.spec === spec);
+
+  if (existingItem) {
+    existingItem.qty += qty;
+    existingItem.itemTotal += itemTotal;
+  } else {
+    const item = { product, spec, unitPrice, qty, itemTotal };
+    items.push(item);
+  }
+
   updateTable();
 }
 
@@ -212,7 +220,7 @@ function updateTable() {
   document.getElementById('grandTotal').innerText = `Grand Total: ₹${grandTotal.toFixed(2)}`;
 
   const quoteText = items.map((item, index) =>
-    `${index + 1}. ${capitalizeFirst(item.product)} - ${item.spec}\nPrice Per Piece: ₹${item.unitPrice.toFixed(2)}\nTotal: ₹${item.itemTotal.toFixed(2)}`
+    `${index + 1}. ${capitalizeFirst(item.product)} - ${item.spec}\nQuantity: ${item.qty}\nPrice Per Piece: ₹${item.unitPrice.toFixed(2)}\nTotal: ₹${item.itemTotal.toFixed(2)}`
   ).join("\n\n");
 
   document.getElementById('copyBlock').innerText =
