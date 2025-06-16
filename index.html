@@ -116,6 +116,8 @@
 
 <h3 id="handlingCharge">Handling Charge: ₹0</h3>
 <h3 id="grandTotal">Grand Total: ₹0</h3>
+  <h4 id="extraNote">Transportation charges extra<br>Payment terms 100% advance</h4>
+
 
 <h3>Quotation</h3>
 <div class="quotation" id="copyBlock">Quotation</div>
@@ -225,7 +227,7 @@ function updateTable() {
   ).join("\n\n");
 
   document.getElementById('copyBlock').innerText =
-  `Quotation\n\n${quoteText}\n\nHandling Charge: ₹${handling.toFixed(2)}\n\nGrand Total: ₹${grandTotal.toFixed(2)}\n\nTransportation charges extra\nPayment terms 100% advance`;
+  `Quotation\n\n${quoteText}\n\nHandling Charge: ₹${handling.toFixed(2)}\n\nGrand Total: ₹${grandTotal.toFixed(2)}`;
 }
 
 function copyQuotation() {
