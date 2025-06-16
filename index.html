@@ -227,7 +227,8 @@ function updateTable() {
   ).join("\n\n");
 
   document.getElementById('copyBlock').innerText =
-  `Quotation\n\n${quoteText}\n\nHandling Charge: ₹${handling.toFixed(2)}\n\nGrand Total: ₹${grandTotal.toFixed(2)}`;
+  `Quotation\n\n${quoteText}\n\nHandling Charge: ₹${handling.toFixed(2)}\n\nGrand Total: ₹${grandTotal.toFixed(2)}\n\nTransportation charges extra\nPayment terms 100% advance`;
+
 }
 
 function copyQuotation() {
